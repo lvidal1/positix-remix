@@ -1,17 +1,23 @@
 import type { LoaderFunction } from "@remix-run/node"
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import invariant from "tiny-invariant";
 
+import type { Post } from "~/models/post.server";
 import { getPost } from "../../models/post.server";
+
+type LoaderData = { post: Post };
 
 
 export const loader: LoaderFunction = async ({ params }) => {
     const post = await getPost(params.slug);
-    return json({ post });
+    invariant(post, `Post not found: ${params.slug}`);
+
+    return json<LoaderData>({ post });
 }
 
 export default function PostSlug() {
-    const { post } = useLoaderData();
+    const { post } = useLoaderData() as LoaderData;
 
     console.log(post);
     return (
